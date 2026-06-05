@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { procesarDesdeBuffer, type FiltrosMerge } from "@/lib/excel-lookup-merge";
 
+// Aumentar timeout a 5 minutos para procesar Excel de ~60MB
+export const maxDuration = 300;
+
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
