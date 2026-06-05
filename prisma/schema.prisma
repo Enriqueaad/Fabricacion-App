@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Pieza {
+  id           Int     @id @default(autoincrement())
+  codigo       String  @unique
+  descripcion  String
+  tipoMaterial String
+  color        String?
+  espesor      Float?
+  largo        Float?
+  ancho        Float?
+  veta         String?
+
+  tapacanto1 String?
+  tapacanto2 String?
+  tapacanto3 String?
+  tapacanto4 String?
+
+  mecanizado Boolean @default(false)
+  perforado  Boolean @default(false)
+  ranura     Boolean @default(false)
+
+  maqEnchapeKal330       Boolean @default(false)
+  maqEnchaperMdsAmbition Boolean @default(false)
+  maqEnchapeStreamSTI    Boolean @default(false)
+  maqEnchapeStreamSTD    Boolean @default(false)
+
+  maqPerforadoBhx500  Boolean @default(false)
+  maqPerforadoBhx055  Boolean @default(false)
+  maqPerforadoBaz32   Boolean @default(false)
+  maqPerforadoBaz211  Boolean @default(false)
+  maqPerforadoWeeke   Boolean @default(false)
+
+  codigoTablero String?
+  rawData       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  detalles DetalleOrden[]
+}
+
+model Orden {
+  id               Int      @id @default(autoincrement())
+  codigo           String   @unique
+  cliente          String
+  proyecto         String
+  conjunto         String?
+  subConjunto      String?
+  colorMelamina    String?
+  espesorGeneral   Float?
+  tapacantoGeneral String?
+  estado           String   @default("BORRADOR")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  detalles         DetalleOrden[]
+  hojasDeRuta      HojaDeRuta[]
+  solicitudesStock SolicitudStock[]
+}
+
+model DetalleOrden {
+  id       Int   @id @default(autoincrement())
+  ordenId  Int
+  piezaId  Int
+  cantidad Int
+  orden    Orden @relation(fields: [ordenId], references: [id], onDelete: Cascade)
+  pieza    Pieza @relation(fields: [piezaId], references: [id])
+
+  @@unique([ordenId, piezaId])
+}
+
+model HojaDeRuta {
+  id           Int      @id @default(autoincrement())
+  ordenId      Int
+  snapshotData String
+  totalPaginas Int
+  pdfPath      String?
+  generadoEn   DateTime @default(now())
+  generadoPor  String?
+  orden        Orden    @relation(fields: [ordenId], references: [id])
+}
+
+model SolicitudStock {
+  id           Int      @id @default(autoincrement())
+  ordenId      Int
+  snapshotData String
+  totalPiezas  Int
+  generadaEn   DateTime @default(now())
+  generadaPor  String?
+  orden        Orden    @relation(fields: [ordenId], references: [id])
+}
